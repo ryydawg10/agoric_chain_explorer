@@ -1,9 +1,9 @@
 const https = require('http');
 const redis = require('redis');
-let lastBlock = "";
-let firstBlock = "";
-let beg = "";
-let end = "";
+let lastBlock;
+let firstBlock;
+let beg;
+let end;
 let fiveMinSpend = 0;
 
 const client = redis.createClient({
@@ -14,11 +14,9 @@ const client = redis.createClient({
 //get the most recent block at the start of the program.
 https.get('http://65.109.34.121:36657/status?', (resp) => {
     let data = '';
-  
     resp.on('data', (chunk) =>  {
       data += chunk;
     });
-  
     resp.on('end', () => {
       //change below to json instead of searching the string.
         beg = data.indexOf("latest_block_height");
@@ -51,7 +49,6 @@ function getSpend(block)
     let bData = "";
     res.on('data', (chunk)=>{
         bData += chunk;
-    
     });
     res.on('end', () => {
         data = JSON.parse(bData);
