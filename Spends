@@ -9,7 +9,7 @@ let fiveMinSpend = 0;
 const client = redis.createClient({
   url: 'redis://localhost:6379'
 });
-client.connect();
+
 
 //get the most recent block at the start of the program.
 https.get('http://65.109.34.121:36657/status?', (resp) => {
@@ -41,6 +41,7 @@ async function updateRedis() {
     } 
     storeSpend(fiveMinSpend);
     fiveMinSpend = 0;
+    await client.quit();
 }
 
 function getSpend(block)
