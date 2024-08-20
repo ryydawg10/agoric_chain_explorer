@@ -2,7 +2,7 @@
 //These functions update redis every five minutes.
 
 const https = require('http');
-const client = require('./Redis');
+const client = require('./RedisClient');
 let lastBlock;
 let firstBlock;
 let beg;
