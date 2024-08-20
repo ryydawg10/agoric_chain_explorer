@@ -1,5 +1,8 @@
+//I assume I need to get historical data as well. I plan to add that later. It shouldn't be too hard. 
+//These functions update redis every five minutes.
+
 const https = require('http');
-const redis = require('redis');
+const client = require('./Redis');
 let lastBlock;
 let firstBlock;
 let beg;
@@ -10,13 +13,14 @@ const client = redis.createClient({
   url: 'redis://localhost:6379'
 });
 
-
 //get the most recent block at the start of the program.
 https.get('http://65.109.34.121:36657/status?', (resp) => {
     let data = '';
+  
     resp.on('data', (chunk) =>  {
       data += chunk;
     });
+  
     resp.on('end', () => {
       //change below to json instead of searching the string.
         beg = data.indexOf("latest_block_height");
@@ -32,14 +36,12 @@ setInterval(updateRedis, fiveMinsMs);
 async function updateRedis() {
   lastBlock = await getLatestBlock();
   setTimeout(function() {},5000);//attempt to fix error message in block json.
-  await client.connect();
     while(firstBlock<=lastBlock) //get spends for every block in the last 5 minutes.
     {
       await getSpend(firstBlock);
     } 
     storeSpend(fiveMinSpend);
     fiveMinSpend = 0;
-    await client.quit();
 }
 
 function getSpend(block)
@@ -49,6 +51,7 @@ function getSpend(block)
     let bData = "";
     res.on('data', (chunk)=>{
         bData += chunk;
+    
     });
     res.on('end', () => {
         data = JSON.parse(bData);
@@ -113,10 +116,9 @@ function findSpends(jsonBlock) //get spends for a block and decode from base64
   return blockSpends;
 }
 
-async function storeSpend(amount) { //store spends in redis
-  const timestamp = Date.now();
+async function storeSpend(amount,timeStamp) { //store spends in redis
   await client.zAdd('spend_data', {
-      score: timestamp,
+      score: timeStamp,
       value: amount.toString()
   });
 }
