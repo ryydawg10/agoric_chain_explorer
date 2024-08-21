@@ -9,9 +9,6 @@ let beg;
 let end;
 let fiveMinSpend = 0;
 
-const client = redis.createClient({
-  url: 'redis://localhost:6379'
-});
 
 //get the most recent block at the start of the program.
 https.get('http://65.109.34.121:36657/status?', (resp) => {
